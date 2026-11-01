@@ -1,0 +1,233 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ----------------------------------------------------------------------
+   Coral Blue Data — design tokens as CSS variables.
+   Mirrors tailwind.config.ts so CMS theme settings can later override at
+   runtime without a rebuild. Keep names in sync with the Tailwind palette.
+---------------------------------------------------------------------- */
+:root {
+  --ink-950: #030b18;
+  --ink-900: #061426; /* Midnight Navy */
+  --ink-800: #082746; /* Deep Ocean */
+  --coral-500: #00a8ff; /* Electric Blue (primary accent) */
+  --coral-400: #38e0f5; /* Cyan highlight */
+  --royal-500: #1258e8; /* Royal Blue */
+  --electric-500: #1258e8;
+  --accent-500: #ff786d; /* Coral accent (restrained) */
+  --mist-50: #f4f7fb;
+  --cyan-500: #20C5F5; /* Electric Cyan */
+
+  --surface: var(--mist-50);
+  --foreground: var(--ink-900);
+
+  --radius: 0.875rem;
+
+  /* Premium glow tokens */
+  --glow-cyan: rgba(32, 197, 245, 0.35);
+  --glow-blue: rgba(18, 88, 232, 0.25);
+  --glow-coral: rgba(255, 120, 109, 0.2);
+}
+
+@layer base {
+  * {
+    @apply border-mist-200;
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-mist-50 text-ink-900 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* Visible, consistent focus — never remove without a replacement. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-coral-500 ring-offset-2 ring-offset-mist-50;
+  }
+  ::selection {
+    background: var(--coral-400);
+    color: var(--ink-900);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@layer components {
+  /* Section rhythm */
+  .section {
+    @apply py-20 md:py-28 lg:py-32;
+  }
+  .section-compact {
+    @apply py-14 md:py-20 lg:py-24;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-coral-700;
+  }
+  /* Restrained coral accent: the small lead-in rule before eyebrows. */
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-8;
+    background: linear-gradient(90deg, var(--accent-500), transparent);
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold tracking-tight transition
+           duration-300 ease-premium focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60;
+  }
+  /* Primary: premium royal→electric gradient with a soft glow. */
+  .btn-primary {
+    @apply btn text-white shadow-glow hover:-translate-y-0.5;
+    background-image: linear-gradient(135deg, var(--royal-500) 0%, var(--coral-500) 100%);
+  }
+  .btn-primary:hover {
+    background-image: linear-gradient(135deg, var(--coral-500) 0%, var(--royal-500) 100%);
+  }
+  .btn-secondary {
+    @apply btn border border-mist-300 bg-white text-ink-800 hover:border-coral-400 hover:text-coral-700 hover:shadow-card;
+  }
+  .btn-ghost-dark {
+    @apply btn border border-white/15 bg-white/5 text-white backdrop-blur-sm hover:border-coral-400/60 hover:bg-white/10;
+  }
+  .btn-accent {
+    @apply btn text-white hover:-translate-y-0.5;
+    background-image: linear-gradient(135deg, #ff786d 0%, #ff5f52 100%);
+    box-shadow: 0 0 0 1px rgba(255,120,109,0.22), 0 12px 36px -12px rgba(255,120,109,0.4);
+  }
+
+  /* Cards */
+  .card {
+    @apply rounded-2xl border border-mist-200 bg-white shadow-card transition duration-300 ease-premium;
+  }
+  .card-hover {
+    @apply card hover:-translate-y-1 hover:border-coral-400/60 hover:shadow-lift;
+  }
+
+  /* Premium glass card (dark sections) */
+  .card-glass {
+    @apply rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md transition duration-300 ease-premium;
+  }
+  .card-glass:hover {
+    @apply border-cyan-400/30 bg-white/[0.08];
+    box-shadow: 0 0 40px -12px var(--glow-cyan);
+  }
+
+  /* Dark-section surfaces */
+  .surface-dark {
+    @apply bg-ink-900 text-mist-100;
+  }
+
+  /* Premium gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #38e0f5 0%, #00a8ff 50%, #1258e8 100%);
+  }
+  .text-gradient-warm {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #ff786d 0%, #ff5f52 40%, #ff786d 100%);
+  }
+
+  /* Hairline divider used across editorial sections */
+  .hairline {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-mist-300 to-transparent;
+  }
+  .hairline-dark {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-white/15 to-transparent;
+  }
+
+  .prose-cbd {
+    @apply max-w-prose leading-relaxed text-mist-700;
+  }
+  .prose-cbd h2 {
+    @apply mt-10 text-2xl text-ink-900;
+  }
+  .prose-cbd h3 {
+    @apply mt-8 text-xl text-ink-900;
+  }
+  .prose-cbd p {
+    @apply mt-4;
+  }
+  .prose-cbd ul {
+    @apply mt-4 list-disc space-y-2 pl-5;
+  }
+
+  /* Stat counter card */
+  .stat-card {
+    @apply flex flex-col items-center rounded-2xl px-6 py-8 text-center;
+  }
+  .stat-number {
+    @apply font-display text-4xl font-bold tracking-tight lg:text-5xl;
+  }
+
+  /* Image overlay gradient */
+  .img-overlay::after {
+    content: "";
+    @apply absolute inset-0 rounded-2xl;
+    background: linear-gradient(180deg, transparent 40%, rgba(6,20,38,0.7) 100%);
+  }
+}
+
+/* Reveal-on-scroll base state; JS adds .is-visible (GSAP or IntersectionObserver).
+   If JS never runs, content stays fully visible (progressive enhancement). */
+.reveal {
+  opacity: 1;
+}
+.js .reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.7s var(--ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Premium pulsing glow animation for decorative elements */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes shimmer-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
