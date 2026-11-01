@@ -53,7 +53,7 @@ const existingSettings = await db
   .select()
   .from(schema.siteSettings)
   .where(eq(schema.siteSettings.id, "singleton"))
-  .get();
+  .then((r) => r[0]);
 if (existingSettings) {
   await db.update(schema.siteSettings).set(settingsValues).where(eq(schema.siteSettings.id, "singleton"));
 } else {

@@ -78,7 +78,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     .from(sessions)
     .innerJoin(adminUsers, eq(sessions.userId, adminUsers.id))
     .where(eq(sessions.id, sid))
-    .get();
+    .then((r) => r[0]);
 
   if (!row) return null;
   if (row.expiresAt.getTime() < Date.now()) {

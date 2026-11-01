@@ -53,7 +53,7 @@ if (!parsed.success) {
 }
 
 const passwordHash = await hashPassword(parsed.data.password);
-const existing = await db.select().from(adminUsers).where(eq(adminUsers.email, parsed.data.email)).get();
+const existing = await db.select().from(adminUsers).where(eq(adminUsers.email, parsed.data.email)).then((r) => r[0]);
 
 if (existing) {
   await db

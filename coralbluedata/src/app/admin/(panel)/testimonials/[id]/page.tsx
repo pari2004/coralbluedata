@@ -12,7 +12,7 @@ import { saveTestimonial, deleteTestimonial } from "../../../actions/content";
 
 export default async function EditTestimonialPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const t = await db.select().from(testimonials).where(eq(testimonials.id, id)).get();
+  const t = await db.select().from(testimonials).where(eq(testimonials.id, id)).then((r) => r[0]);
   if (!t) notFound();
   const save = saveTestimonial.bind(null, id);
   const del = deleteTestimonial.bind(null, id);

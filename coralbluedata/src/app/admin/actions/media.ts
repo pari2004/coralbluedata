@@ -45,7 +45,7 @@ export async function updateMediaAlt(id: string, formData: FormData): Promise<vo
 
 export async function deleteMedia(id: string): Promise<void> {
   const user = await requireApiUser();
-  const row = await db.select().from(media).where(eq(media.id, id)).get();
+  const row = await db.select().from(media).where(eq(media.id, id)).then((r) => r[0]);
   if (!row) return;
   await deleteMediaFile(row.filename);
   await db.delete(media).where(eq(media.id, id));

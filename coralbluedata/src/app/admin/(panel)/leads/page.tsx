@@ -35,7 +35,7 @@ export default async function LeadsPage({
       .orderBy(desc(enquiries.createdAt))
       .limit(PAGE_SIZE)
       .offset((pageNum - 1) * PAGE_SIZE),
-    db.select({ n: count() }).from(enquiries).where(where).get(),
+    db.select({ n: count() }).from(enquiries).where(where).then((r) => r[0]),
   ]);
   const total = totalRow?.n ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));

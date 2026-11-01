@@ -15,7 +15,7 @@ const ADDABLE = SECTION_TYPES.filter((t) => t !== "hero" && t !== "logo_strip" &
 
 export default async function EditPagePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const page = await db.select().from(pages).where(eq(pages.id, id)).get();
+  const page = await db.select().from(pages).where(eq(pages.id, id)).then((r) => r[0]);
   if (!page) notFound();
 
   const sections = await db.select().from(pageSections).where(eq(pageSections.pageId, id)).orderBy(asc(pageSections.order));

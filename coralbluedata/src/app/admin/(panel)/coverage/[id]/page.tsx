@@ -12,7 +12,7 @@ import { saveCoverage, deleteCoverage } from "../../../actions/content";
 
 export default async function EditCoveragePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const c = await db.select().from(coverageEntries).where(eq(coverageEntries.id, id)).get();
+  const c = await db.select().from(coverageEntries).where(eq(coverageEntries.id, id)).then((r) => r[0]);
   if (!c) notFound();
   const save = saveCoverage.bind(null, id);
   const del = deleteCoverage.bind(null, id);

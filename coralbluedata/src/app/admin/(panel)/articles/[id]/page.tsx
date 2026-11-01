@@ -12,7 +12,7 @@ import { saveArticle, deleteArticle } from "../../../actions/content";
 
 export default async function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const a = await db.select().from(articles).where(eq(articles.id, id)).get();
+  const a = await db.select().from(articles).where(eq(articles.id, id)).then((r) => r[0]);
   if (!a) notFound();
   const save = saveArticle.bind(null, id);
   const del = deleteArticle.bind(null, id);

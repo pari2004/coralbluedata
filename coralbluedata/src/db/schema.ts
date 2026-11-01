@@ -1,33 +1,31 @@
 /**
  * Drizzle schema — single source of truth for the data model.
- * Dialect: SQLite/libSQL (dev + simple prod). Column types are kept portable
- * so the schema can be regenerated for Postgres (see docs/ARCHITECTURE.md §6).
- *
- * Conventions:
+ * Dialect: PostgreSQL (Neon). Column types mirror the previous SQLite model:
  *  - text primary keys hold UUIDs (generated in app code via crypto.randomUUID)
- *  - timestamps are stored as epoch-ms integers (mode: "timestamp")
- *  - structured block / list payloads are stored as JSON text (mode: "json")
+ *  - timestamps use `timestamp` (returned as JS Date) — all app code uses Date
+ *  - structured block / list payloads are stored as `jsonb`
  *  - every public-facing content table has an explicit status + isSeed flag
  */
-import { sql, relations } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
-  sqliteTable,
+  pgTable,
   text,
   integer,
+  boolean,
+  jsonb,
+  timestamp,
   index,
   uniqueIndex,
-} from "drizzle-orm/sqlite-core";
-
-const now = sql`(unixepoch() * 1000)`;
+} from "drizzle-orm/pg-core";
 
 /** Shared timestamp columns. */
 const timestamps = {
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
     .notNull()
-    .default(now),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
     .notNull()
-    .default(now),
+    .defaultNow(),
 };
 
 export const CONTENT_STATUS = ["draft", "published", "archived"] as const;
@@ -38,7 +36,7 @@ export type EnquiryStatus = (typeof ENQUIRY_STATUS)[number];
 
 /* ---------------------------------------------------------------- auth */
 
-export const adminUsers = sqliteTable(
+export const adminUsers = pgTable(
   "admin_users",
   {
     id: text("id").primaryKey(),
@@ -46,28 +44,28 @@ export const adminUsers = sqliteTable(
     name: text("name").notNull(),
     passwordHash: text("password_hash").notNull(),
     role: text("role", { enum: ["owner", "editor"] }).notNull().default("editor"),
-    lastLoginAt: integer("last_login_at", { mode: "timestamp_ms" }),
+    lastLoginAt: timestamp("last_login_at", { withTimezone: true, mode: "date" }),
     ...timestamps,
   },
   (t) => ({ emailIdx: uniqueIndex("admin_users_email_idx").on(t.email) }),
 );
 
-export const sessions = sqliteTable(
+export const sessions = pgTable(
   "sessions",
   {
     id: text("id").primaryKey(), // random opaque id; signed reference stored in cookie
     userId: text("user_id")
       .notNull()
       .references(() => adminUsers.id, { onDelete: "cascade" }),
-    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(now),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
   (t) => ({ userIdx: index("sessions_user_idx").on(t.userId) }),
 );
 
 /* ---------------------------------------------------------------- pages */
 
-export const pages = sqliteTable(
+export const pages = pgTable(
   "pages",
   {
     id: text("id").primaryKey(),
@@ -81,8 +79,8 @@ export const pages = sqliteTable(
     seoTitle: text("seo_title"),
     seoDescription: text("seo_description"),
     ogImageId: text("og_image_id"),
-    publishedAt: integer("published_at", { mode: "timestamp_ms" }),
-    isSeed: integer("is_seed", { mode: "boolean" }).notNull().default(false),
+    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }),
+    isSeed: boolean("is_seed").notNull().default(false),
     ...timestamps,
   },
   (t) => ({
@@ -105,7 +103,7 @@ export const SECTION_TYPES = [
 ] as const;
 export type SectionType = (typeof SECTION_TYPES)[number];
 
-export const pageSections = sqliteTable(
+export const pageSections = pgTable(
   "page_sections",
   {
     id: text("id").primaryKey(),
@@ -114,9 +112,9 @@ export const pageSections = sqliteTable(
       .references(() => pages.id, { onDelete: "cascade" }),
     type: text("type", { enum: SECTION_TYPES }).notNull(),
     order: integer("order").notNull().default(0),
-    isVisible: integer("is_visible", { mode: "boolean" }).notNull().default(true),
+    isVisible: boolean("is_visible").notNull().default(true),
     // Structured block payload — shape depends on `type`; validated by Zod in the editor.
-    data: text("data", { mode: "json" }).$type<Record<string, unknown>>().notNull().default({}),
+    data: jsonb("data").$type<Record<string, unknown>>().notNull().default({}),
     ...timestamps,
   },
   (t) => ({ pageIdx: index("page_sections_page_idx").on(t.pageId, t.order) }),
@@ -124,7 +122,7 @@ export const pageSections = sqliteTable(
 
 /* ---------------------------------------------------------------- services */
 
-export const services = sqliteTable(
+export const services = pgTable(
   "services",
   {
     id: text("id").primaryKey(),
@@ -135,13 +133,13 @@ export const services = sqliteTable(
     heroHeading: text("hero_heading"),
     heroSubheading: text("hero_subheading"),
     body: text("body").notNull().default(""),
-    benefits: text("benefits", { mode: "json" }).$type<string[]>().notNull().default([]),
-    useCases: text("use_cases", { mode: "json" }).$type<string[]>().notNull().default([]),
-    workflow: text("workflow", { mode: "json" })
+    benefits: jsonb("benefits").$type<string[]>().notNull().default([]),
+    useCases: jsonb("use_cases").$type<string[]>().notNull().default([]),
+    workflow: jsonb("workflow")
       .$type<{ title: string; detail: string }[]>()
       .notNull()
       .default([]),
-    relatedServiceIds: text("related_service_ids", { mode: "json" })
+    relatedServiceIds: jsonb("related_service_ids")
       .$type<string[]>()
       .notNull()
       .default([]),
@@ -149,7 +147,7 @@ export const services = sqliteTable(
     seoDescription: text("seo_description"),
     status: text("status", { enum: CONTENT_STATUS }).notNull().default("draft"),
     order: integer("order").notNull().default(0),
-    isSeed: integer("is_seed", { mode: "boolean" }).notNull().default(false),
+    isSeed: boolean("is_seed").notNull().default(false),
     ...timestamps,
   },
   (t) => ({
@@ -160,7 +158,7 @@ export const services = sqliteTable(
 
 /* ---------------------------------------------------------------- industries */
 
-export const industries = sqliteTable(
+export const industries = pgTable(
   "industries",
   {
     id: text("id").primaryKey(),
@@ -173,7 +171,7 @@ export const industries = sqliteTable(
     seoDescription: text("seo_description"),
     status: text("status", { enum: CONTENT_STATUS }).notNull().default("draft"),
     order: integer("order").notNull().default(0),
-    isSeed: integer("is_seed", { mode: "boolean" }).notNull().default(false),
+    isSeed: boolean("is_seed").notNull().default(false),
     ...timestamps,
   },
   (t) => ({
@@ -184,7 +182,7 @@ export const industries = sqliteTable(
 
 /* ---------------------------------------------------------------- blog */
 
-export const categories = sqliteTable(
+export const categories = pgTable(
   "categories",
   {
     id: text("id").primaryKey(),
@@ -195,7 +193,7 @@ export const categories = sqliteTable(
   (t) => ({ slugIdx: uniqueIndex("categories_slug_idx").on(t.slug) }),
 );
 
-export const tags = sqliteTable(
+export const tags = pgTable(
   "tags",
   {
     id: text("id").primaryKey(),
@@ -205,7 +203,7 @@ export const tags = sqliteTable(
   (t) => ({ slugIdx: uniqueIndex("tags_slug_idx").on(t.slug) }),
 );
 
-export const articles = sqliteTable(
+export const articles = pgTable(
   "articles",
   {
     id: text("id").primaryKey(),
@@ -219,8 +217,8 @@ export const articles = sqliteTable(
     seoTitle: text("seo_title"),
     seoDescription: text("seo_description"),
     status: text("status", { enum: CONTENT_STATUS }).notNull().default("draft"),
-    publishedAt: integer("published_at", { mode: "timestamp_ms" }),
-    isSeed: integer("is_seed", { mode: "boolean" }).notNull().default(false),
+    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }),
+    isSeed: boolean("is_seed").notNull().default(false),
     ...timestamps,
   },
   (t) => ({
@@ -229,7 +227,7 @@ export const articles = sqliteTable(
   }),
 );
 
-export const articleTags = sqliteTable(
+export const articleTags = pgTable(
   "article_tags",
   {
     articleId: text("article_id")
@@ -244,7 +242,7 @@ export const articleTags = sqliteTable(
 
 /* ---------------------------------------------------------------- case studies / testimonials */
 
-export const caseStudies = sqliteTable(
+export const caseStudies = pgTable(
   "case_studies",
   {
     id: text("id").primaryKey(),
@@ -254,11 +252,11 @@ export const caseStudies = sqliteTable(
     summary: text("summary").notNull().default(""),
     challenge: text("challenge").notNull().default(""),
     solution: text("solution").notNull().default(""),
-    outcomes: text("outcomes", { mode: "json" }).$type<string[]>().notNull().default([]),
-    verified: integer("verified", { mode: "boolean" }).notNull().default(false),
+    outcomes: jsonb("outcomes").$type<string[]>().notNull().default([]),
+    verified: boolean("verified").notNull().default(false),
     status: text("status", { enum: CONTENT_STATUS }).notNull().default("draft"),
     order: integer("order").notNull().default(0),
-    isSeed: integer("is_seed", { mode: "boolean" }).notNull().default(false),
+    isSeed: boolean("is_seed").notNull().default(false),
     ...timestamps,
   },
   (t) => ({
@@ -267,7 +265,7 @@ export const caseStudies = sqliteTable(
   }),
 );
 
-export const testimonials = sqliteTable(
+export const testimonials = pgTable(
   "testimonials",
   {
     id: text("id").primaryKey(),
@@ -275,10 +273,10 @@ export const testimonials = sqliteTable(
     role: text("role"),
     company: text("company"),
     quote: text("quote").notNull(),
-    verified: integer("verified", { mode: "boolean" }).notNull().default(false),
+    verified: boolean("verified").notNull().default(false),
     status: text("status", { enum: CONTENT_STATUS }).notNull().default("draft"),
     order: integer("order").notNull().default(0),
-    isSeed: integer("is_seed", { mode: "boolean" }).notNull().default(false),
+    isSeed: boolean("is_seed").notNull().default(false),
     ...timestamps,
   },
   (t) => ({ statusIdx: index("testimonials_status_idx").on(t.status) }),
@@ -286,7 +284,7 @@ export const testimonials = sqliteTable(
 
 /* ---------------------------------------------------------------- coverage */
 
-export const coverageEntries = sqliteTable(
+export const coverageEntries = pgTable(
   "coverage_entries",
   {
     id: text("id").primaryKey(),
@@ -295,10 +293,10 @@ export const coverageEntries = sqliteTable(
     detail: text("detail").notNull().default(""),
     lat: integer("lat"),
     lng: integer("lng"),
-    verified: integer("verified", { mode: "boolean" }).notNull().default(false),
+    verified: boolean("verified").notNull().default(false),
     status: text("status", { enum: CONTENT_STATUS }).notNull().default("draft"),
     order: integer("order").notNull().default(0),
-    isSeed: integer("is_seed", { mode: "boolean" }).notNull().default(false),
+    isSeed: boolean("is_seed").notNull().default(false),
     ...timestamps,
   },
   (t) => ({ statusIdx: index("coverage_status_idx").on(t.status) }),
@@ -306,7 +304,7 @@ export const coverageEntries = sqliteTable(
 
 /* ---------------------------------------------------------------- media */
 
-export const media = sqliteTable(
+export const media = pgTable(
   "media",
   {
     id: text("id").primaryKey(),
@@ -320,14 +318,14 @@ export const media = sqliteTable(
     alt: text("alt").notNull().default(""),
     title: text("title"),
     uploadedBy: text("uploaded_by").references(() => adminUsers.id, { onDelete: "set null" }),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(now),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
   (t) => ({ createdIdx: index("media_created_idx").on(t.createdAt) }),
 );
 
 /* ---------------------------------------------------------------- nav / cta */
 
-export const navItems = sqliteTable(
+export const navItems = pgTable(
   "nav_items",
   {
     id: text("id").primaryKey(),
@@ -337,13 +335,13 @@ export const navItems = sqliteTable(
     href: text("href").notNull(),
     parentId: text("parent_id"),
     order: integer("order").notNull().default(0),
-    isVisible: integer("is_visible", { mode: "boolean" }).notNull().default(true),
+    isVisible: boolean("is_visible").notNull().default(true),
     ...timestamps,
   },
   (t) => ({ menuIdx: index("nav_items_menu_idx").on(t.menu, t.order) }),
 );
 
-export const ctaBlocks = sqliteTable(
+export const ctaBlocks = pgTable(
   "cta_blocks",
   {
     id: text("id").primaryKey(),
@@ -359,7 +357,7 @@ export const ctaBlocks = sqliteTable(
 
 /* ---------------------------------------------------------------- enquiries */
 
-export const enquiries = sqliteTable(
+export const enquiries = pgTable(
   "enquiries",
   {
     id: text("id").primaryKey(),
@@ -375,7 +373,7 @@ export const enquiries = sqliteTable(
     spamScore: integer("spam_score").notNull().default(0),
     ip: text("ip"),
     userAgent: text("user_agent"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(now),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
   (t) => ({
     statusIdx: index("enquiries_status_idx").on(t.status, t.createdAt),
@@ -383,7 +381,7 @@ export const enquiries = sqliteTable(
   }),
 );
 
-export const enquiryNotes = sqliteTable(
+export const enquiryNotes = pgTable(
   "enquiry_notes",
   {
     id: text("id").primaryKey(),
@@ -395,14 +393,14 @@ export const enquiryNotes = sqliteTable(
     // Optional status transition recorded alongside the note.
     statusFrom: text("status_from"),
     statusTo: text("status_to"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(now),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
   (t) => ({ enquiryIdx: index("enquiry_notes_enquiry_idx").on(t.enquiryId) }),
 );
 
 /* ---------------------------------------------------------------- settings / audit */
 
-export const siteSettings = sqliteTable("site_settings", {
+export const siteSettings = pgTable("site_settings", {
   id: text("id").primaryKey().default("singleton"),
   companyName: text("company_name").notNull().default("Coral Blue Data"),
   logoMediaId: text("logo_media_id"),
@@ -411,7 +409,7 @@ export const siteSettings = sqliteTable("site_settings", {
   contactPhone: text("contact_phone"),
   contactAddress: text("contact_address"),
   footerTagline: text("footer_tagline").notNull().default(""),
-  socialLinks: text("social_links", { mode: "json" })
+  socialLinks: jsonb("social_links")
     .$type<{ platform: string; url: string }[]>()
     .notNull()
     .default([]),
@@ -425,7 +423,7 @@ export const siteSettings = sqliteTable("site_settings", {
   ...timestamps,
 });
 
-export const auditEvents = sqliteTable(
+export const auditEvents = pgTable(
   "audit_events",
   {
     id: text("id").primaryKey(),
@@ -433,9 +431,9 @@ export const auditEvents = sqliteTable(
     action: text("action").notNull(), // e.g. "page.publish"
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id"),
-    meta: text("meta", { mode: "json" }).$type<Record<string, unknown>>(),
+    meta: jsonb("meta").$type<Record<string, unknown>>(),
     ip: text("ip"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(now),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
   (t) => ({ createdIdx: index("audit_events_created_idx").on(t.createdAt) }),
 );

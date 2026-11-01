@@ -41,7 +41,7 @@ export async function savePage(id: string | null, _prev: Result, formData: FormD
   const publishedAt = d.status === "published" ? new Date() : null;
 
   if (id) {
-    const existing = await db.select().from(pages).where(eq(pages.id, id)).get();
+    const existing = await db.select().from(pages).where(eq(pages.id, id)).then((r) => r[0]);
     await db
       .update(pages)
       .set({
@@ -76,7 +76,7 @@ export async function addSection(pageId: string, formData: FormData): Promise<vo
   const user = await requireApiUser();
   const type = str(formData.get("type")) as SectionType;
   if (!SECTION_TYPES.includes(type)) return;
-  const maxRow = await db.select({ m: max(pageSections.order) }).from(pageSections).where(eq(pageSections.pageId, pageId)).get();
+  const maxRow = await db.select({ m: max(pageSections.order) }).from(pageSections).where(eq(pageSections.pageId, pageId)).then((r) => r[0]);
   const order = (maxRow?.m ?? -1) + 1;
   await db.insert(pageSections).values({ id: uid(), pageId, type, order, isVisible: true, data: {} });
   await logAudit({ actorId: user.id, action: "section.add", entityType: "page_section", entityId: pageId, meta: { type } });
@@ -125,7 +125,7 @@ function parseSectionData(type: SectionType, formData: FormData): Record<string,
 
 export async function updateSection(sectionId: string, pageId: string, formData: FormData): Promise<void> {
   const user = await requireApiUser();
-  const section = await db.select().from(pageSections).where(eq(pageSections.id, sectionId)).get();
+  const section = await db.select().from(pageSections).where(eq(pageSections.id, sectionId)).then((r) => r[0]);
   if (!section) return;
   const data = parseSectionData(section.type, formData);
   const isVisible = formData.get("isVisible") === "on";

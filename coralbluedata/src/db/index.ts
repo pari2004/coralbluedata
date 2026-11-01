@@ -1,28 +1,16 @@
 /**
- * Database client. Uses libSQL (SQLite) per docs/ARCHITECTURE.md §6.
- * All application data access goes through this Drizzle instance so a future
- * move to Postgres only touches this file + drizzle.config, not business code.
+ * Database client. Uses Neon serverless Postgres over HTTP via Drizzle.
+ * The HTTP driver is stateless and ideal for serverless/edge runtimes
+ * (one fetch per query). All application data access goes through this
+ * Drizzle instance.
  */
-import { mkdirSync, existsSync } from "node:fs";
-import { dirname } from "node:path";
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
 import { env } from "@/env";
 import * as schema from "./schema";
 
-// For local file-backed databases, make sure the parent directory exists
-// before libSQL tries to open the file (SQLITE_CANTOPEN otherwise).
-if (env.DATABASE_URL.startsWith("file:")) {
-  const filePath = env.DATABASE_URL.replace(/^file:/, "");
-  const dir = dirname(filePath);
-  if (dir && dir !== "." && !existsSync(dir)) mkdirSync(dir, { recursive: true });
-}
+const sql = neon(env.DATABASE_URL);
 
-const client = createClient({
-  url: env.DATABASE_URL,
-  authToken: env.DATABASE_AUTH_TOKEN,
-});
-
-export const db = drizzle(client, { schema });
+export const db = drizzle(sql, { schema });
 export { schema };
 export type DB = typeof db;

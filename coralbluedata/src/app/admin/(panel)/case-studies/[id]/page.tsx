@@ -12,7 +12,7 @@ import { saveCaseStudy, deleteCaseStudy } from "../../../actions/content";
 
 export default async function EditCaseStudyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const c = await db.select().from(caseStudies).where(eq(caseStudies.id, id)).get();
+  const c = await db.select().from(caseStudies).where(eq(caseStudies.id, id)).then((r) => r[0]);
   if (!c) notFound();
   const save = saveCaseStudy.bind(null, id);
   const del = deleteCaseStudy.bind(null, id);

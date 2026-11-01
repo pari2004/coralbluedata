@@ -27,7 +27,7 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   });
   if (!parsed.success) return { error: "Enter a valid email and password." };
 
-  const user = await db.select().from(adminUsers).where(eq(adminUsers.email, parsed.data.email)).get();
+  const user = await db.select().from(adminUsers).where(eq(adminUsers.email, parsed.data.email)).then((r) => r[0]);
 
   // Constant-ish response: verify against a dummy hash when user is missing to
   // avoid trivial user-enumeration via timing.

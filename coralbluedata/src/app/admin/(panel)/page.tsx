@@ -7,7 +7,7 @@ import { Card, PageHeader, StatusBadge } from "@/components/admin/ui";
 import { formatDate } from "@/lib/utils";
 
 async function countWhere(table: typeof pages | typeof articles, status: string) {
-  const r = await db.select({ n: count() }).from(table).where(eq(table.status, status as never)).get();
+  const r = await db.select({ n: count() }).from(table).where(eq(table.status, status as never)).then((r) => r[0]);
   return r?.n ?? 0;
 }
 
@@ -17,9 +17,9 @@ export default async function DashboardPage() {
       countWhere(pages, "published"),
       countWhere(pages, "draft"),
       countWhere(articles, "published"),
-      db.select({ n: count() }).from(services).where(eq(services.status, "published")).get().then((r) => r?.n ?? 0),
-      db.select({ n: count() }).from(enquiries).where(eq(enquiries.status, "new")).get().then((r) => r?.n ?? 0),
-      db.select({ n: count() }).from(enquiries).get().then((r) => r?.n ?? 0),
+      db.select({ n: count() }).from(services).where(eq(services.status, "published")).then((r) => r[0]).then((r) => r?.n ?? 0),
+      db.select({ n: count() }).from(enquiries).where(eq(enquiries.status, "new")).then((r) => r[0]).then((r) => r?.n ?? 0),
+      db.select({ n: count() }).from(enquiries).then((r) => r[0]).then((r) => r?.n ?? 0),
       db.select().from(enquiries).orderBy(desc(enquiries.createdAt)).limit(5),
       db
         .select({

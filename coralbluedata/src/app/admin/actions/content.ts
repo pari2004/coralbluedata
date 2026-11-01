@@ -151,7 +151,7 @@ export async function saveArticle(id: string | null, _prev: ActionResult, formDa
   const publishedAt = d.status === "published" ? new Date() : null;
 
   if (id) {
-    const existing = await db.select().from(articles).where(eq(articles.id, id)).get();
+    const existing = await db.select().from(articles).where(eq(articles.id, id)).then((r) => r[0]);
     await db
       .update(articles)
       .set({
@@ -349,7 +349,7 @@ export async function saveSettings(_prev: ActionResult, formData: FormData): Pro
     secondaryCtaHref: d.secondaryCtaHref,
     updatedAt: new Date(),
   };
-  const existing = await db.select().from(siteSettings).where(eq(siteSettings.id, "singleton")).get();
+  const existing = await db.select().from(siteSettings).where(eq(siteSettings.id, "singleton")).then((r) => r[0]);
   if (existing) {
     await db.update(siteSettings).set(values).where(eq(siteSettings.id, "singleton"));
   } else {

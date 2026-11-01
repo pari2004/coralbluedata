@@ -10,7 +10,7 @@ import { updateLeadStatus, addLeadNote } from "../../../actions/leads";
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const lead = await db.select().from(enquiries).where(eq(enquiries.id, id)).get();
+  const lead = await db.select().from(enquiries).where(eq(enquiries.id, id)).then((r) => r[0]);
   if (!lead) notFound();
 
   const notes = await db

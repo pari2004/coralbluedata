@@ -28,7 +28,7 @@ export async function getPublishedPage(slug: string) {
     .select()
     .from(pages)
     .where(and(eq(pages.slug, slug), eq(pages.status, "published")))
-    .get();
+    .then((r) => r[0]);
   if (!page) return null;
   const sections = await db
     .select()
@@ -53,7 +53,7 @@ export function getPublishedService(slug: string) {
     .select()
     .from(services)
     .where(and(eq(services.slug, slug), eq(services.status, "published")))
-    .get();
+    .then((r) => r[0]);
 }
 
 /* ---------------------------------------------------------- industries */
@@ -71,7 +71,7 @@ export function getPublishedIndustry(slug: string) {
     .select()
     .from(industries)
     .where(and(eq(industries.slug, slug), eq(industries.status, "published")))
-    .get();
+    .then((r) => r[0]);
 }
 
 /* ---------------------------------------------------------- articles */
@@ -90,7 +90,7 @@ export function getPublishedArticle(slug: string) {
     .select()
     .from(articles)
     .where(and(eq(articles.slug, slug), eq(articles.status, "published")))
-    .get();
+    .then((r) => r[0]);
 }
 
 /* ---------------------------------------------------------- case studies */
@@ -108,7 +108,7 @@ export function getPublishedCaseStudy(slug: string) {
     .select()
     .from(caseStudies)
     .where(and(eq(caseStudies.slug, slug), eq(caseStudies.status, "published")))
-    .get();
+    .then((r) => r[0]);
 }
 
 /* ---------------------------------------------------------- testimonials
@@ -143,10 +143,10 @@ export function listNav(menu: string) {
 }
 
 export async function getCta(key: string) {
-  return db.select().from(ctaBlocks).where(eq(ctaBlocks.key, key)).get();
+  return db.select().from(ctaBlocks).where(eq(ctaBlocks.key, key)).then((r) => r[0]);
 }
 
 export async function getSettings() {
-  const row = await db.select().from(siteSettings).where(eq(siteSettings.id, "singleton")).get();
+  const row = await db.select().from(siteSettings).where(eq(siteSettings.id, "singleton")).then((r) => r[0]);
   return row ?? null;
 }

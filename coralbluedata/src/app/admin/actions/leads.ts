@@ -13,7 +13,7 @@ export async function updateLeadStatus(id: string, formData: FormData) {
   const parsed = enquiryStatusSchema.safeParse({ status: formData.get("status") });
   if (!parsed.success) return;
 
-  const current = await db.select().from(enquiries).where(eq(enquiries.id, id)).get();
+  const current = await db.select().from(enquiries).where(eq(enquiries.id, id)).then((r) => r[0]);
   if (!current) return;
 
   await db.update(enquiries).set({ status: parsed.data.status }).where(eq(enquiries.id, id));

@@ -12,7 +12,7 @@ import { saveIndustry, deleteIndustry } from "../../../actions/content";
 
 export default async function EditIndustryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const s = await db.select().from(industries).where(eq(industries.id, id)).get();
+  const s = await db.select().from(industries).where(eq(industries.id, id)).then((r) => r[0]);
   if (!s) notFound();
   const save = saveIndustry.bind(null, id);
   const del = deleteIndustry.bind(null, id);

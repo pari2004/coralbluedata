@@ -12,7 +12,7 @@ import { saveService, deleteService } from "../../../actions/content";
 
 export default async function EditServicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const s = await db.select().from(services).where(eq(services.id, id)).get();
+  const s = await db.select().from(services).where(eq(services.id, id)).then((r) => r[0]);
   if (!s) notFound();
 
   const save = saveService.bind(null, id);

@@ -8,8 +8,8 @@ const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   APP_URL: z.string().url().default("http://localhost:3000"),
 
-  DATABASE_URL: z.string().default("file:./data/app.db"),
-  DATABASE_DIALECT: z.enum(["sqlite", "postgres"]).default("sqlite"),
+  DATABASE_URL: z.string().min(1, "DATABASE_URL is required (Neon Postgres connection string)"),
+  DATABASE_DIALECT: z.enum(["sqlite", "postgres"]).default("postgres"),
   DATABASE_AUTH_TOKEN: z.string().optional(),
 
   SESSION_SECRET: z
