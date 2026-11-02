@@ -41,10 +41,10 @@ const settingsValues = {
   footerTagline:
     "B2B data intelligence — accurate company and contact data, cleansed, verified and delivered the way your team works.",
   socialLinks: [],
-  primaryCtaLabel: "Request a Quote",
+  primaryCtaLabel: "Request Quote",
   primaryCtaHref: "/request-a-quote",
-  secondaryCtaLabel: "Explore Solutions",
-  secondaryCtaHref: "/solutions",
+  secondaryCtaLabel: "Talk with an Expert",
+  secondaryCtaHref: "/contact",
   defaultSeoTitle: "Coral Blue Data — B2B Data Intelligence",
   defaultSeoDescription:
     "Find the right companies and contacts, keep records accurate, and act on better sales data.",
@@ -152,12 +152,37 @@ for (const [i, s] of services.entries()) {
 }
 
 /* ---- industries (PUBLISHED: honest generic copy) --------------------- */
-const industries = [
+const industries: {
+  title: string;
+  icon: string;
+  summary: string;
+  body?: string;
+}[] = [
+  {
+    title: "Healthcare",
+    icon: "stethoscope",
+    summary:
+      "Reach healthcare organisations and the clinicians, administrators and procurement teams who make buying decisions — with data handled at a sector-appropriate standard of care.",
+    body: [
+      "Selling into healthcare rarely means selling to one person. A decision usually moves through clinicians, department heads, procurement and value-analysis committees, each weighing clinical evidence, cost and risk differently. Reaching the right people at the right accounts is the first, unglamorous half of the job — and it is where accurate data earns its keep.",
+
+      "We help you build and target a map of your healthcare audience across roles and settings — physicians and specialists across practice areas, nursing and allied-health professionals, hospital and clinic administrators, procurement, purchasing and value-analysis committees, pharmacy and laboratory directors, and the facilities they work in, from group practices to surgery centres and long-term-care providers.",
+
+      "Common challenges we build data to address: long, multi-stakeholder buying cycles; gatekeepers who shield clinical decision-makers; records that go stale quickly as professionals move, change credentials or switch facilities; and lists that look large but are thin on the roles you actually sell to.",
+
+      "Our approach is to start from your addressable market rather than an off-the-shelf list. We source from relevant channels, validate and de-duplicate, and enrich records with the firmographic and role attributes your team needs to segment and personalise — so campaigns reach fewer, better-qualified contacts instead of a bigger pile of unqualified ones.",
+
+      "Healthcare data carries obligations that other sectors do not. We handle it with sector-appropriate care: this is professional business-contact data for legitimate B2B outreach, not patient data, and we work to keep it accurate, permissioned and compliant with applicable data-protection rules.",
+
+      "Tell us the roles, specialties, facility types and geographies you are targeting, and we will scope a dataset — or a sample — around that. " +
+        PLACEHOLDER,
+    ].join("\n\n"),
+  },
   { title: "Technology", icon: "cpu", summary: "Reach technology companies and the teams that buy, build and run software." },
-  { title: "Healthcare", icon: "stethoscope", summary: "Connect with healthcare organisations and professionals, handled with sector-appropriate care." },
+  { title: "Education", icon: "graduation-cap", summary: "Engage schools, universities and training providers across the education sector." },
   { title: "Manufacturing", icon: "factory", summary: "Target manufacturers across sub-sectors, functions and company sizes." },
-  { title: "Financial Services", icon: "landmark", summary: "Engage banking, insurance and financial-services organisations and roles." },
-  { title: "Business Services", icon: "briefcase", summary: "Find professional and business-services firms that fit your ideal customer profile." },
+  { title: "Pharmaceutical", icon: "pill", summary: "Reach pharmaceutical companies and the teams driving research, production and distribution." },
+  { title: "Medical Devices", icon: "heart-pulse", summary: "Connect with medical-device manufacturers and the professionals who specify and buy." },
 ];
 for (const [i, ind] of industries.entries()) {
   await db.insert(schema.industries).values({
@@ -166,7 +191,7 @@ for (const [i, ind] of industries.entries()) {
     title: ind.title,
     icon: ind.icon,
     summary: ind.summary,
-    body: `${ind.summary}\n\n${PLACEHOLDER}`,
+    body: ind.body ?? `${ind.summary}\n\n${PLACEHOLDER}`,
     seoDescription: ind.summary,
     status: "published",
     order: i,
@@ -248,11 +273,12 @@ for (const [i, region] of ["North America", "EMEA", "APAC", "LATAM"].entries()) 
 
 /* ---- navigation ------------------------------------------------------- */
 const header = [
-  { label: "Solutions", href: "/solutions" },
+  { label: "Explore Solution", href: "/solutions" },
   { label: "Industries", href: "/industries" },
-  { label: "Coverage", href: "/coverage" },
   { label: "Data Quality", href: "/data-quality" },
-  { label: "Resources", href: "/resources" },
+  { label: "Coverage", href: "/coverage" },
+  { label: "Resource", href: "/resources" },
+  { label: "Services", href: "/solutions" },
   { label: "About", href: "/about" },
 ];
 for (const [i, n] of header.entries()) {

@@ -10,6 +10,7 @@ import { Icon } from "@/components/ui/icon";
 
 export type NavLink = { label: string; href: string };
 export type ServiceLink = { title: string; slug: string; summary: string; icon: string };
+export type IndustryLink = { label: string; href: string; icon: string };
 
 export function HeaderClient({
   navLinks,
@@ -19,7 +20,7 @@ export function HeaderClient({
 }: {
   navLinks: NavLink[];
   services: ServiceLink[];
-  industries: NavLink[];
+  industries: IndustryLink[];
   cta: { primaryLabel: string; primaryHref: string; secondaryLabel: string; secondaryHref: string };
 }) {
   const pathname = usePathname();
@@ -48,6 +49,9 @@ export function HeaderClient({
     };
   }, [mobileOpen]);
 
+  // "Explore Solution" sits beside the logo, outside the main nav group.
+  const exploreLink = navLinks.find((l) => l.label === "Explore Solution");
+
   return (
     <header
       className={cn(
@@ -64,6 +68,8 @@ export function HeaderClient({
           scrolled ? "h-16 md:h-20" : "h-[4.5rem] md:h-24",
         )}
       >
+        {/* Left cluster: logo + the "Explore Solution" entry-point link. */}
+        <div className="flex items-center gap-4 lg:gap-6">
         {/* Logo: full-colour artwork on the light (scrolled) bar, a white-lettered
             variant (blue icon + "BLUE" kept) over the dark hero. Both are stacked
             and cross-fade on scroll. Images are tightly cropped, so the height
@@ -101,6 +107,19 @@ export function HeaderClient({
           />
         </Link>
 
+          {exploreLink && (
+            <Link
+              href={exploreLink.href}
+              className={cn(
+                "hidden rounded-lg px-3 py-2 text-sm font-semibold transition-colors lg:inline-flex",
+                scrolled ? "text-ink-700 hover:text-coral-700" : "text-mist-100 hover:text-white",
+              )}
+            >
+              {exploreLink.label}
+            </Link>
+          )}
+        </div>
+
         {/* Desktop nav */}
         <nav
           className={cn(
@@ -109,25 +128,31 @@ export function HeaderClient({
           )}
           aria-label="Primary"
         >
-          <MenuTrigger
-            label="Solutions"
-            open={openMenu === "solutions"}
-            onOpen={() => setOpenMenu("solutions")}
-            scrolled={scrolled}
-          />
-          <MenuTrigger
-            label="Industries"
-            open={openMenu === "industries"}
-            onOpen={() => setOpenMenu("industries")}
-            scrolled={scrolled}
-          />
           {navLinks
-            .filter((l) => !["Solutions", "Industries"].includes(l.label))
-            .map((l) => (
-              <TopLink key={l.href} href={l.href} scrolled={scrolled}>
+            .filter((l) => l.label !== "Explore Solution")
+            .map((l) =>
+            l.label === "Services" ? (
+              <MenuTrigger
+                key={l.label}
+                label="Services"
+                open={openMenu === "solutions"}
+                onOpen={() => setOpenMenu("solutions")}
+                scrolled={scrolled}
+              />
+            ) : l.label === "Industries" ? (
+              <MenuTrigger
+                key={l.label}
+                label="Industries"
+                open={openMenu === "industries"}
+                onOpen={() => setOpenMenu("industries")}
+                scrolled={scrolled}
+              />
+            ) : (
+              <TopLink key={l.label} href={l.href} scrolled={scrolled}>
                 {l.label}
               </TopLink>
-            ))}
+            ),
+          )}
         </nav>
 
         {/* CTAs */}
@@ -200,11 +225,19 @@ export function HeaderClient({
               <Link
                 key={i.href}
                 href={i.href}
-                className="rounded-xl px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-mist-100 hover:text-coral-700"
+                className="group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-mist-100 hover:text-coral-700"
               >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-coral-500/10 text-coral-600">
+                  <Icon name={i.icon} className="h-5 w-5" />
+                </span>
                 {i.label}
               </Link>
             ))}
+          </div>
+          <div className="mt-4 flex items-center justify-end border-t border-mist-200 pt-4">
+            <Link href="/industries" className="text-sm font-semibold text-coral-700 hover:underline">
+              Explore More →
+            </Link>
           </div>
         </MegaPanel>
       )}
@@ -213,19 +246,25 @@ export function HeaderClient({
       {mobileOpen && (
         <div className="lg:hidden">
           <div className="max-h-[calc(100vh-4.5rem)] overflow-y-auto border-t border-mist-200 bg-mist-50 px-5 pb-10 pt-4">
-            <MobileGroup label="Solutions" links={services.map((s) => ({ label: s.title, href: `/solutions/${s.slug}` }))} />
-            <MobileGroup label="Industries" links={industries} />
-            {navLinks
-              .filter((l) => !["Solutions", "Industries"].includes(l.label))
-              .map((l) => (
+            {navLinks.map((l) =>
+              l.label === "Services" ? (
+                <MobileGroup
+                  key={l.label}
+                  label="Services"
+                  links={services.map((s) => ({ label: s.title, href: `/solutions/${s.slug}` }))}
+                />
+              ) : l.label === "Industries" ? (
+                <MobileGroup key={l.label} label="Industries" links={industries} />
+              ) : (
                 <Link
-                  key={l.href}
+                  key={l.label}
                   href={l.href}
                   className="block border-b border-mist-200 py-3 text-base font-semibold text-ink-900"
                 >
                   {l.label}
                 </Link>
-              ))}
+              ),
+            )}
             <div className="mt-6 flex flex-col gap-3">
               <Link href={cta.primaryHref} className="btn-primary w-full">
                 {cta.primaryLabel}

@@ -1,5 +1,5 @@
 import { listPublishedServices, listPublishedIndustries, listNav, getSettings } from "@/lib/content";
-import { HeaderClient, type NavLink, type ServiceLink } from "./HeaderClient";
+import { HeaderClient, type NavLink, type ServiceLink, type IndustryLink } from "./HeaderClient";
 
 /**
  * Server shell: pulls published nav/services/industries + settings from the
@@ -20,9 +20,10 @@ export async function SiteHeader() {
     icon: s.icon,
   }));
 
-  const industryLinks: NavLink[] = industries.map((i) => ({
+  const industryLinks: IndustryLink[] = industries.map((i) => ({
     label: i.title,
     href: `/industries/${i.slug}`,
+    icon: i.icon,
   }));
 
   const navLinks: NavLink[] = headerNav.map((n) => ({ label: n.label, href: n.href }));
@@ -33,10 +34,10 @@ export async function SiteHeader() {
       services={serviceLinks}
       industries={industryLinks}
       cta={{
-        primaryLabel: settings?.primaryCtaLabel ?? "Request a Quote",
+        primaryLabel: settings?.primaryCtaLabel ?? "Request Quote",
         primaryHref: settings?.primaryCtaHref ?? "/request-a-quote",
-        secondaryLabel: settings?.secondaryCtaLabel ?? "Explore Solutions",
-        secondaryHref: settings?.secondaryCtaHref ?? "/solutions",
+        secondaryLabel: settings?.secondaryCtaLabel ?? "Talk with an Expert",
+        secondaryHref: settings?.secondaryCtaHref ?? "/contact",
       }}
     />
   );

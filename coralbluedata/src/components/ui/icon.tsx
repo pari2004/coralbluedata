@@ -12,6 +12,9 @@ import {
   Briefcase,
   Database,
   Building2,
+  GraduationCap,
+  Pill,
+  HeartPulse,
   ArrowRight,
   type LucideIcon,
 } from "lucide-react";
@@ -35,6 +38,9 @@ const MAP: Record<string, LucideIcon> = {
   briefcase: Briefcase,
   database: Database,
   "building-2": Building2,
+  "graduation-cap": GraduationCap,
+  pill: Pill,
+  "heart-pulse": HeartPulse,
 };
 
 export function Icon({
