@@ -20,9 +20,33 @@ export async function requireApiUser(): Promise<SessionUser> {
   return user;
 }
 
+/**
+ * For owner-only surfaces (user management, etc.): authenticate, then require
+ * the "owner" role. Editors are bounced back to the dashboard.
+ */
+export async function requireOwner(): Promise<SessionUser> {
+  const user = await requireUser();
+  if (user.role !== "owner") redirect("/admin");
+  return user;
+}
+
+/** Owner-only guard for server actions: throws instead of redirecting. */
+export async function requireApiOwner(): Promise<SessionUser> {
+  const user = await requireApiUser();
+  if (user.role !== "owner") throw new ForbiddenError();
+  return user;
+}
+
 export class UnauthorizedError extends Error {
   constructor() {
     super("Unauthorized");
     this.name = "UnauthorizedError";
+  }
+}
+
+export class ForbiddenError extends Error {
+  constructor() {
+    super("Forbidden");
+    this.name = "ForbiddenError";
   }
 }

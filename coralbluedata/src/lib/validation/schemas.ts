@@ -29,17 +29,35 @@ export const loginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
+/** Password policy shared by the CLI bootstrap and the in-CMS user manager. */
+export const adminPasswordSchema = z
+  .string()
+  .min(12, "Use at least 12 characters")
+  .max(200)
+  .regex(/[a-z]/, "Include a lowercase letter")
+  .regex(/[A-Z]/, "Include an uppercase letter")
+  .regex(/[0-9]/, "Include a number");
+
+export const adminRoleSchema = z.enum(["owner", "editor"]);
+
 export const createAdminSchema = z.object({
   email: z.string().trim().email().max(200),
   name: z.string().trim().min(2).max(120),
-  password: z
-    .string()
-    .min(12, "Use at least 12 characters")
-    .max(200)
-    .regex(/[a-z]/, "Include a lowercase letter")
-    .regex(/[A-Z]/, "Include an uppercase letter")
-    .regex(/[0-9]/, "Include a number"),
-  role: z.enum(["owner", "editor"]).default("owner"),
+  password: adminPasswordSchema,
+  role: adminRoleSchema.default("owner"),
+});
+
+/* --------------------------------------------------- admin: user manager */
+
+/**
+ * Identity fields for creating/editing an admin user inside the CMS.
+ * The password is validated separately (adminPasswordSchema) because it is
+ * required when creating but optional when editing (blank = keep current).
+ */
+export const adminUserSchema = z.object({
+  email: z.string().trim().email("Enter a valid email").max(200),
+  name: z.string().trim().min(2, "Enter a name").max(120),
+  role: adminRoleSchema.default("editor"),
 });
 
 /* --------------------------------------------------- admin: content */

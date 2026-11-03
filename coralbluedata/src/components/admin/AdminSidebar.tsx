@@ -15,6 +15,7 @@ import {
   Quote,
   Globe2,
   Image as ImageIcon,
+  Users,
   Settings,
   LogOut,
   Menu,
@@ -34,6 +35,8 @@ const NAV = [
   { href: "/admin/testimonials", label: "Testimonials", icon: Quote },
   { href: "/admin/coverage", label: "Coverage", icon: Globe2 },
   { href: "/admin/media", label: "Media", icon: ImageIcon },
+  // Owner-only: managing admin accounts & permissions.
+  { href: "/admin/users", label: "Users", icon: Users, ownerOnly: true },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -49,6 +52,8 @@ export function AdminSidebar({
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
+
+  const nav = NAV.filter((item) => !item.ownerOnly || user.role === "owner");
 
   return (
     <>
@@ -81,7 +86,7 @@ export function AdminSidebar({
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 lg:py-2" aria-label="Admin">
-          {NAV.map((item) => {
+          {nav.map((item) => {
             const active = isActive(item.href, item.exact);
             return (
               <Link
