@@ -79,7 +79,7 @@ export function HeaderClient({
           aria-label="Coral Blue Data home"
           className={cn(
             "relative block shrink-0 aspect-[711/138] transition-[height] duration-500 ease-premium",
-            scrolled ? "h-10 md:h-12 lg:h-10 xl:h-14" : "h-11 md:h-14 lg:h-11 xl:h-16",
+            scrolled ? "h-10 md:h-12 lg:h-10 xl:h-12" : "h-11 md:h-14 lg:h-11 xl:h-14",
           )}
         >
           <Image
@@ -111,7 +111,7 @@ export function HeaderClient({
             <Link
               href={exploreLink.href}
               className={cn(
-                "hidden rounded-lg px-3 py-2 text-sm font-semibold transition-colors lg:inline-flex",
+                "hidden rounded-lg px-3 py-2 text-sm font-semibold transition-colors xl:inline-flex",
                 scrolled ? "text-ink-700 hover:text-coral-700" : "text-mist-100 hover:text-white",
               )}
             >
@@ -123,7 +123,7 @@ export function HeaderClient({
         {/* Desktop nav */}
         <nav
           className={cn(
-            "hidden items-center gap-1 lg:flex",
+            "hidden items-center gap-1 xl:flex",
             scrolled ? "text-ink-700" : "text-mist-100",
           )}
           aria-label="Primary"
@@ -156,7 +156,7 @@ export function HeaderClient({
         </nav>
 
         {/* CTAs */}
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-3 xl:flex">
           <Link
             href={cta.secondaryHref}
             className={cn(
@@ -176,7 +176,7 @@ export function HeaderClient({
           type="button"
           onClick={() => setMobileOpen((v) => !v)}
           className={cn(
-            "grid h-10 w-10 place-items-center rounded-lg lg:hidden",
+            "grid h-10 w-10 place-items-center rounded-lg xl:hidden",
             scrolled ? "text-ink-800" : "text-white",
           )}
           aria-expanded={mobileOpen}
@@ -244,8 +244,8 @@ export function HeaderClient({
 
       {/* Mobile sheet */}
       {mobileOpen && (
-        <div className="lg:hidden">
-          <div className="max-h-[calc(100vh-4.5rem)] overflow-y-auto border-t border-mist-200 bg-mist-50 px-5 pb-10 pt-4">
+        <div className="xl:hidden">
+          <div className="max-h-[calc(100vh-4.5rem)] overflow-y-auto border-t border-mist-200 bg-mist-50 px-5 pb-10 pt-4 md:max-h-[calc(100vh-6rem)]">
             {navLinks.map((l) =>
               l.label === "Services" ? (
                 <MobileGroup
@@ -285,7 +285,7 @@ function TopLink({ href, scrolled, children }: { href: string; scrolled: boolean
     <Link
       href={href}
       className={cn(
-        "rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
+        "whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
         scrolled ? "hover:text-coral-700" : "hover:text-white",
       )}
     >
@@ -312,7 +312,7 @@ function MenuTrigger({
       onFocus={onOpen}
       aria-expanded={open}
       className={cn(
-        "flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
+        "flex items-center gap-1 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
         scrolled ? "hover:text-coral-700" : "hover:text-white",
         open && (scrolled ? "text-coral-700" : "text-white"),
       )}
@@ -325,7 +325,7 @@ function MenuTrigger({
 
 function MegaPanel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="absolute inset-x-0 top-full hidden lg:block">
+    <div className="absolute inset-x-0 top-full hidden xl:block">
       <div className="container">
         <div className="animate-fade-up rounded-2xl border border-mist-200 bg-white p-6 shadow-lift">
           {children}
