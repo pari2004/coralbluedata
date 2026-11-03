@@ -57,7 +57,7 @@ export const EDU_CSS = `@import url('https://fonts.googleapis.com/css2?family=In
 .hc .nav a:hover{color:var(--cyan)}
 .hc .nav .btn{padding:12px 22px;min-height:44px}
 .hc /* HERO */
-.hero-grid{display:flex;flex-wrap:wrap;gap:56px;align-items:center;padding:56px 24px 104px;max-width:1280px;margin:0 auto}
+.hero-grid{display:flex;flex-wrap:wrap;gap:56px;align-items:center;padding:128px 24px 104px;max-width:1280px;margin:0 auto}
 .hc .hero-copy{flex:999 1 560px;min-width:0}
 .hc .crumbs{font-size:13px;color:var(--on-dark-2);margin-bottom:28px}
 .hc .crumbs a{color:var(--on-dark-2);text-decoration:none}
@@ -256,7 +256,7 @@ export const EDU_BODY = `<!-- HERO -->
 
   <div class="hero-grid">
     <div class="hero-copy">
-      <nav aria-label="Breadcrumb" class="crumbs"><a href="#">Home</a> / <a href="#">Industries</a> / <span>Education</span></nav>
+      <nav aria-label="Breadcrumb" class="crumbs"><a href="/">Home</a> / <a href="/industries">Industries</a> / <span aria-current="page">Education</span></nav>
       <p class="tag">Industry · Education</p>
       <h1>Education data that reaches the people who <span class="grad-text">approve, budget and buy</span></h1>
       <p class="hero-sub">Verified contacts for district leaders, principals, university administrators, faculty and procurement teams — segmented by institution type, grade level, enrollment size and region.</p>

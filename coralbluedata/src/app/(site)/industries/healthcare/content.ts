@@ -67,7 +67,7 @@ export const HEALTH_CSS = `@import url('https://fonts.googleapis.com/css2?family
 .hero{position:relative;overflow:hidden;color:#fff;background:var(--ink-950)}
 .hc .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,205,247,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(99,205,247,.07) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,#000 30%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,#000 30%,transparent 80%)}
 .hc .hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 50% 40% at 50% 0%,rgba(18,88,232,.55),transparent 70%),radial-gradient(ellipse 40% 30% at 85% 70%,rgba(56,224,245,.12),transparent 70%)}
-.hc .hero-inner{position:relative;z-index:1;padding:56px 24px 0;text-align:center}
+.hc .hero-inner{position:relative;z-index:1;padding:128px 24px 0;text-align:center}
 .hc .crumbs{font-size:13px;color:var(--on-dark-3);margin-bottom:28px}
 .hc .crumbs a{color:var(--on-dark-3);text-decoration:none}
 .hc .crumbs span{color:#e9eff7}
